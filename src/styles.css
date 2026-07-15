@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/*
+ * Design system — fuente única de verdad de los valores de marca (ARCHITECTURE §11).
+ * Los tokens se consumen vía las utilidades generadas por Tailwind v4
+ * (--color-brand-green → bg-brand-green/text-brand-green/border-brand-green, etc.)
+ * o como var(--token) dentro de bloques <style> de host.
+ */
+@theme {
+  /* Colores de marca */
+  --color-brand-green: #00965e; /* Primarios / Verde */
+  --color-brand-teal: #00a2b5; /* Secundarios / Azul */
+  --color-green-light: #93bd0e; /* Secundarios / Verde Claro */
+  --color-green-light-80: #a9ca3e; /* Secundarios / Verde Claro 80% */
+
+  /* Neutros */
+  --color-ink: #2d2926; /* Primarios / Dark */
+  --color-ink-80: #575451; /* Primarios / Dark 80% */
+  --color-ink-60: #817f7d; /* Primarios / Dark 60% */
+  --color-ink-40: #aba9a8; /* Primarios / Dark 40% */
+  --color-slate: #333333; /* Grises / Semi Dark */
+  --color-medium-40: #bfbfbf; /* Primarios / Medium 40% */
+  --color-light: #f3f3f3; /* Primarios / light */
+  --color-light-20: #fdfdfd; /* Primarios / light 20% */
+
+  /* Tabla */
+  --color-table-head: #ccecf0; /* fondo header de tabla */
+  --color-row-odd: #fdfdfd; /* fila impar */
+  --color-row-even: #f8f8f8; /* fila par */
+  --color-border-row: #dfdfdf; /* borde entre filas */
+  --color-border-input: #dadada; /* borde de inputs/selects */
+
+  /* Tipografía */
+  --font-sans: "BNPP Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-condensed: "BNPP Sans Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-roboto: "Roboto", system-ui, sans-serif;
+
+  /* Tamaños de fuente fuera de la escala estándar de Tailwind (design system) */
+  --text-label: 0.9375rem; /* 15px — Label */
+  --text-sub: 0.8125rem; /* 13px — encabezados/celdas de tabla */
+
+  /* Radios de marca */
+  --radius-input: 3.23px;
+  --radius-action: 6px;
+}
+
+/*
+ * Fuentes de marca BNPP Sans (fallback activo mientras no estén los .woff2).
+ * Al recibir los archivos, colocarlos en public/fonts/ y descomentar. El layout
+ * ya está calibrado; solo cambia el render exacto del glifo.
+ *
+ * @font-face { font-family: "BNPP Sans"; font-weight: 300; src: url("/fonts/BNPPSans-Light.woff2") format("woff2"); }
+ * @font-face { font-family: "BNPP Sans"; font-weight: 400; src: url("/fonts/BNPPSans-Regular.woff2") format("woff2"); }
+ * @font-face { font-family: "BNPP Sans"; font-weight: 700; src: url("/fonts/BNPPSans-Bold.woff2") format("woff2"); }
+ * @font-face { font-family: "BNPP Sans Condensed"; font-weight: 400; src: url("/fonts/BNPPSansCondensed-Regular.woff2") format("woff2"); }
+ */
+
+html,
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+}

@@ -1,0 +1,28 @@
+import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideTanStackQuery, QueryClient } from '@tanstack/angular-query-experimental';
+import { provideKeycloak } from 'keycloak-angular';
+
+import { environment } from '../environments/environment';
+import { routes } from './app.routes';
+import { authInterceptor } from './core/interceptors/auth-interceptor';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    // `login-required` fuerza que un usuario sin sesión sea redirigido
+    // directamente al login de Keycloak durante el bootstrap (sin página
+    // intermedia). `provideKeycloak` cablea el app initializer automáticamente.
+    provideKeycloak({
+      config: environment.keycloak,
+      initOptions: {
+        onLoad: 'login-required',
+      },
+    }),
+    provideBrowserGlobalErrorListeners(),
+    provideZonelessChangeDetection(),
+    provideRouter(routes),
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideTanStackQuery(new QueryClient())
+  ]
+};
