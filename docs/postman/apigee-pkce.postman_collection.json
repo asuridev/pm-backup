@@ -1,0 +1,266 @@
+{
+  "info": {
+    "name": "Apigee — OAuth2 Authorization Code + PKCE",
+    "description": "Emula el flujo OAuth2 + PKCE que implementa el portal (ver docs/apigee-auth-flow.md).\n\nNo necesita navegador: el /authorize de Apigee devuelve el code sin login ni consentimiento, así que todo se resuelve con peticiones HTTP puras. El iframe y el componente de callback que usa la app existen para capturar el redirect en el navegador; aquí el redirect ni siquiera se sigue.\n\nUSO: ejecutar la colección con el Collection Runner, o los dos requests EN ORDEN. El code es de un solo uso y caduca rápido: no sirve reejecutar el /token sin volver a pasar por el /authorize.\n\nIMPORTANTE: `1. authorize` tiene los redirects DESACTIVADOS a propósito (protocolProfileBehavior.followRedirects=false). El code viaja en la cabecera Location del 302; si Postman siguiera el redirect, se perdería.\n\nVerificada con: newman run docs/postman/apigee-pkce.postman_collection.json",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "authUrl",
+      "value": "https://api.latam.cloud.cardifnet.com/oauth2/v1",
+      "type": "string"
+    },
+    {
+      "key": "clientId",
+      "value": "XjuYyYC1jSNuZMP0zEjveBpNGldiO1fAl42MxKaYdY4zCABm",
+      "type": "string"
+    },
+    {
+      "key": "redirectUri",
+      "value": "https://oi-auto-cla.latam.cloud.cardifnet.com/callback",
+      "type": "string",
+      "description": "Debe estar registrado como callback en la app de Apigee. Aquí el navegador nunca lo visita: solo tiene que coincidir entre el authorize y el token."
+    },
+    {
+      "key": "scope",
+      "value": "foo",
+      "type": "string"
+    },
+    {
+      "key": "idp",
+      "value": "noidp",
+      "type": "string"
+    },
+    {
+      "key": "codeVerifier",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "codeChallenge",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "state",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "code",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. authorize (genera PKCE y obtiene el code)",
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Genera las credenciales PKCE (RFC 7636), igual que src/app/features/auth/services/pkce.ts",
+              "// CryptoJS ya es global en el sandbox de Postman: redeclararlo con",
+              "// `const CryptoJS = require(...)` lanza 'already been declared'.",
+              "const CJS = require('crypto-js');",
+              "",
+              "const toB64Url = (wa) => CJS.enc.Base64.stringify(wa)",
+              "  .replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=/g, '');",
+              "",
+              "// verifier: 32 bytes aleatorios -> 43 chars (el RFC exige 43-128)",
+              "const verifier = toB64Url(CJS.lib.WordArray.random(32));",
+              "// challenge: base64url(SHA-256(verifier)) = método S256",
+              "const challenge = toB64Url(CJS.SHA256(verifier));",
+              "// state: nonce anti-CSRF, debe volver idéntico",
+              "const state = toB64Url(CJS.lib.WordArray.random(12));",
+              "",
+              "pm.collectionVariables.set('codeVerifier', verifier);",
+              "pm.collectionVariables.set('codeChallenge', challenge);",
+              "pm.collectionVariables.set('state', state);",
+              "",
+              "console.log('verifier :', verifier);",
+              "console.log('challenge:', challenge);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// El code viaja en la cabecera Location del 302, no en el body.",
+              "pm.test('302 (si da 400, revisa redirect_uri/client_id)', function () {",
+              "  if (pm.response.code === 400) {",
+              "    console.log('Respuesta:', pm.response.text());",
+              "  }",
+              "  pm.expect(pm.response.code).to.eql(302);",
+              "});",
+              "",
+              "const location = pm.response.headers.get('Location');",
+              "pm.test('trae cabecera Location', function () {",
+              "  pm.expect(location).to.be.a('string');",
+              "});",
+              "",
+              "if (location) {",
+              "  // El sandbox de Postman no tiene URLSearchParams: se parsea a mano.",
+              "  const pick = (name) => {",
+              "    const m = location.match(new RegExp('[?&]' + name + '=([^&]*)'));",
+              "    return m ? decodeURIComponent(m[1]) : null;",
+              "  };",
+              "  const code = pick('code');",
+              "  const returnedState = pick('state');",
+              "",
+              "  pm.collectionVariables.set('code', code);",
+              "",
+              "  pm.test('el state vuelve idéntico (anti-CSRF)', function () {",
+              "    pm.expect(returnedState).to.eql(pm.collectionVariables.get('state'));",
+              "  });",
+              "  pm.test('devuelve un code', function () {",
+              "    pm.expect(code).to.be.a('string').and.not.empty;",
+              "  });",
+              "",
+              "  console.log('code:', code);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "*/*"
+          }
+        ],
+        "url": {
+          "raw": "{{authUrl}}/authorize?response_type=code&client_id={{clientId}}&code_challenge_method=S256&code_challenge={{codeChallenge}}&redirect_uri={{redirectUri}}&scope={{scope}}&idp={{idp}}&state={{state}}",
+          "host": [
+            "{{authUrl}}"
+          ],
+          "path": [
+            "authorize"
+          ],
+          "query": [
+            {
+              "key": "response_type",
+              "value": "code"
+            },
+            {
+              "key": "client_id",
+              "value": "{{clientId}}"
+            },
+            {
+              "key": "code_challenge_method",
+              "value": "S256"
+            },
+            {
+              "key": "code_challenge",
+              "value": "{{codeChallenge}}"
+            },
+            {
+              "key": "redirect_uri",
+              "value": "{{redirectUri}}"
+            },
+            {
+              "key": "scope",
+              "value": "{{scope}}"
+            },
+            {
+              "key": "idp",
+              "value": "{{idp}}"
+            },
+            {
+              "key": "state",
+              "value": "{{state}}"
+            }
+          ]
+        },
+        "description": "Paso 1. Redirects desactivados: el code está en la cabecera Location del 302."
+      }
+    },
+    {
+      "name": "2. token (canjea el code por el access_token)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('200 OK', function () {",
+              "  if (pm.response.code !== 200) console.log('Respuesta:', pm.response.text());",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "",
+              "const json = pm.response.json();",
+              "",
+              "pm.test('devuelve access_token', function () {",
+              "  pm.expect(json.access_token).to.be.a('string').and.not.empty;",
+              "});",
+              "pm.test('token_type Bearer', function () {",
+              "  pm.expect(json.token_type).to.eql('Bearer');",
+              "});",
+              "",
+              "pm.collectionVariables.set('accessToken', json.access_token);",
+              "console.log('access_token:', json.access_token, '| expira en', json.expires_in, 's');"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/x-www-form-urlencoded"
+          }
+        ],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "grant_type",
+              "value": "authorization_code"
+            },
+            {
+              "key": "code",
+              "value": "{{code}}"
+            },
+            {
+              "key": "redirect_uri",
+              "value": "{{redirectUri}}"
+            },
+            {
+              "key": "client_id",
+              "value": "{{clientId}}"
+            },
+            {
+              "key": "code_verifier",
+              "value": "{{codeVerifier}}"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{authUrl}}/token",
+          "host": [
+            "{{authUrl}}"
+          ],
+          "path": [
+            "token"
+          ]
+        },
+        "description": "Paso 3. El redirect_uri debe ser idéntico al del authorize (no se visita, solo se compara). El code_verifier es lo que prueba que somos quienes iniciamos el flujo."
+      }
+    }
+  ]
+}
