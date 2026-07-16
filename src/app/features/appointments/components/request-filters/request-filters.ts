@@ -4,7 +4,6 @@ import {
   DestroyRef,
   computed,
   inject,
-  output,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -13,6 +12,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { PARTNERS } from '../../data/partners';
 import { RequestFilter } from '../../models/appointment-request-model';
+import { AppointmentFiltersStore } from '../../store/appointment-filters.store';
 
 interface ViewOption {
   readonly label: string;
@@ -29,7 +29,8 @@ const VIEW_OPTIONS: readonly ViewOption[] = [
 /**
  * Bloque de filtros compartido por ambas pestañas: select de socio, búsqueda por
  * nombre/cédula (client-side) y filtro "Ver:" (→ eventStatus). Reactive Forms
- * (CONSTITUTION §8). Emite cada cambio hacia la página contenedora.
+ * (CONSTITUTION §8). Escribe cada cambio en `AppointmentFiltersStore`, del que
+ * también lee su selección — así el bloque se rehidrata al volver a montarse.
  */
 @Component({
   selector: 'app-request-filters',
@@ -63,24 +64,13 @@ const VIEW_OPTIONS: readonly ViewOption[] = [
               <ul
                 class="absolute top-full left-0 z-20 mt-1 max-h-64 w-full overflow-auto rounded-input border-[1.08px] border-border-input bg-white py-1 shadow-lg"
               >
-                <li>
-                  <button
-                    type="button"
-                    class="block w-full px-2.5 py-2 text-left text-base hover:bg-brand-green hover:text-white"
-                    [class.text-brand-green]="selectedId() === ''"
-                    [class.text-ink-60]="selectedId() !== ''"
-                    (click)="selectSocio('')"
-                  >
-                    Todos
-                  </button>
-                </li>
                 @for (partner of partners; track partner.id) {
                   <li>
                     <button
                       type="button"
                       class="block w-full px-2.5 py-2 text-left text-base hover:bg-brand-green hover:text-white"
-                      [class.text-brand-green]="selectedId() === partner.id"
-                      [class.text-ink-60]="selectedId() !== partner.id"
+                      [class.text-brand-green]="store.partnerId() === partner.id"
+                      [class.text-ink-60]="store.partnerId() !== partner.id"
                       (click)="selectSocio(partner.id)"
                     >
                       {{ partner.name }}
@@ -118,7 +108,7 @@ const VIEW_OPTIONS: readonly ViewOption[] = [
           @for (opt of viewOptions; track opt.value) {
             <button
               type="button"
-              [class.underline]="opt.value === activeView()"
+              [class.underline]="opt.value === store.view()"
               (click)="setView(opt.value)"
             >
               {{ opt.label }}
@@ -133,34 +123,25 @@ export class RequestFilters {
   private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
 
+  protected readonly store = inject(AppointmentFiltersStore);
   protected readonly partners = PARTNERS;
   protected readonly viewOptions = VIEW_OPTIONS;
-  protected readonly activeView = signal<RequestFilter>('ALL');
 
-  /** Estado del dropdown custom de socio. */
+  /** Estado del dropdown custom de socio (UI efímera, no va al store). */
   protected readonly socioOpen = signal(false);
-  protected readonly selectedId = signal('');
-  protected readonly selectedLabel = computed(() => {
-    const id = this.selectedId();
-    return PARTNERS.find((p) => p.id === id)?.name ?? 'Todos';
-  });
+  protected readonly selectedLabel = computed(
+    () => PARTNERS.find((p) => p.id === this.store.partnerId())?.name ?? '',
+  );
 
   protected readonly form = this.fb.nonNullable.group({
-    partnerId: '',
-    search: '',
+    partnerId: this.store.partnerId(),
+    search: this.store.search(),
   });
-
-  /** socio → `partnerId` (undefined = Todos). */
-  readonly partnerChange = output<string | undefined>();
-  /** texto de búsqueda (filtrado client-side en la página). */
-  readonly searchChange = output<string>();
-  /** filtro "Ver:" → eventStatus. */
-  readonly viewChange = output<RequestFilter>();
 
   constructor() {
     this.form.controls.partnerId.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
-      .subscribe((id) => this.partnerChange.emit(id || undefined));
+      .subscribe((id) => this.store.setPartner(id));
 
     this.form.controls.search.valueChanges
       .pipe(
@@ -168,13 +149,11 @@ export class RequestFilters {
         distinctUntilChanged(),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe((text) => this.searchChange.emit(text.trim()));
+      .subscribe((text) => this.store.setSearch(text.trim()));
   }
 
   protected setView(value: RequestFilter): void {
-    if (value === this.activeView()) return;
-    this.activeView.set(value);
-    this.viewChange.emit(value);
+    this.store.setView(value);
   }
 
   protected toggleSocio(event: Event): void {
@@ -184,7 +163,6 @@ export class RequestFilters {
   }
 
   protected selectSocio(id: string): void {
-    this.selectedId.set(id);
     this.form.controls.partnerId.setValue(id);
     this.socioOpen.set(false);
   }

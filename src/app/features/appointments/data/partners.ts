@@ -15,3 +15,6 @@ export const PARTNERS: readonly Partner[] = [
   { name: 'Tuya', id: '23e733b5-ab93-4e34-86c5-7a9d290063a1' },
   { name: 'Occidente', id: '2efd0584-d38a-4a2f-9dd8-42f2905c3aae' },
 ];
+
+/** Socio preseleccionado al entrar al feature. */
+export const DEFAULT_PARTNER_ID = PARTNERS[0].id;

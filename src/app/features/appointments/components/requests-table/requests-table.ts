@@ -67,9 +67,9 @@ export interface RowAction {
               [style.grid-template-columns]="gridTemplate()"
             >
               @for (col of columns(); track col.key) {
-                <div class="flex min-w-0 items-center justify-center px-1" role="cell">
+                <div class="flex min-w-0 items-center justify-start px-1" role="cell">
                   <span
-                    class="w-full truncate text-center text-xs text-ink"
+                    class="w-full truncate text-left text-xs text-ink"
                     [title]="row[col.key]"
                   >
                     {{ row[col.key] }}
@@ -102,7 +102,7 @@ export interface RowAction {
               @for (col of columns(); track col.key) {
                 <div class="flex items-baseline justify-between gap-3">
                   <dt class="shrink-0 text-sub text-brand-teal">{{ col.label }}</dt>
-                  <dd class="min-w-0 truncate text-right text-xs text-ink" [title]="row[col.key]">
+                  <dd class="min-w-0 truncate text-left text-xs text-ink" [title]="row[col.key]">
                     {{ row[col.key] }}
                   </dd>
                 </div>

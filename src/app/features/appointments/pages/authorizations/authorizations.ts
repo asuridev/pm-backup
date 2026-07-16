@@ -1,14 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { injectQuery } from '@tanstack/angular-query-experimental';
 
 import { RequestFilters } from '../../components/request-filters/request-filters';
 import { ColumnDef, RequestsTable } from '../../components/requests-table/requests-table';
 import { AppointmentsQueries } from '../../queries/appointments-queries';
-import {
-  RequestFilter,
-  mapDtoToRow,
-} from '../../models/appointment-request-model';
+import { mapDtoToRow } from '../../models/appointment-request-model';
 import { filterRowsBySearch } from '../../models/filter-rows';
+import { AppointmentFiltersStore } from '../../store/appointment-filters.store';
 
 const COLUMNS: readonly ColumnDef[] = [
   { label: 'Nombre del cliente', key: 'nombre' },
@@ -29,11 +27,7 @@ const COLUMNS: readonly ColumnDef[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RequestFilters, RequestsTable],
   template: `
-    <app-request-filters
-      (partnerChange)="partnerId.set($event)"
-      (viewChange)="view.set($event)"
-      (searchChange)="search.set($event)"
-    />
+    <app-request-filters />
 
     @if (query.isPending()) {
       <p class="pt-12 text-center text-sm text-ink-60">Cargando solicitudes…</p>
@@ -54,21 +48,22 @@ const COLUMNS: readonly ColumnDef[] = [
 })
 export class Authorizations {
   private queries = inject(AppointmentsQueries);
+  private filters = inject(AppointmentFiltersStore);
 
   protected readonly columns = COLUMNS;
-  protected readonly partnerId = signal<string | undefined>(undefined);
-  protected readonly view = signal<RequestFilter>('ALL');
-  protected readonly search = signal('');
 
   protected readonly query = injectQuery(() => {
-    const view = this.view();
+    const view = this.filters.view();
     return this.queries.list({
-      partnerId: this.partnerId(),
+      partnerId: this.filters.partnerId(),
       eventStatus: view === 'ALL' ? undefined : view,
     });
   });
 
   protected readonly rows = computed(() =>
-    filterRowsBySearch((this.query.data() ?? []).map(mapDtoToRow), this.search()),
+    filterRowsBySearch(
+      (this.query.data() ?? []).map(mapDtoToRow),
+      this.filters.search(),
+    ),
   );
 }
