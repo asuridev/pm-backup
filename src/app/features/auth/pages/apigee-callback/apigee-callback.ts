@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import {
   APIGEE_CALLBACK_MESSAGE,
@@ -22,6 +22,15 @@ import {
 export class ApigeeCallback {
   constructor() {
     const params = inject(ActivatedRoute).snapshot.queryParamMap;
+
+    // Fuera del iframe esta ruta no tiene destinatario: `window.parent` sería
+    // esta misma ventana y el mensaje se perdería, dejando al usuario en una
+    // pantalla vacía sin salida. Pasa si llega por un marcador, un F5 o una URL
+    // escrita a mano, así que se le devuelve al portal.
+    if (window.self === window.top) {
+      inject(Router).navigateByUrl('/');
+      return;
+    }
 
     const message: ApigeeCallbackMessage = {
       type: APIGEE_CALLBACK_MESSAGE,

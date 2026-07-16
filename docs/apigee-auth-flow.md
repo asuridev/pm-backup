@@ -162,6 +162,20 @@ que es quien tiene el `code_verifier`. El contrato del mensaje está tipado en
 `models/apigee-callback-model.ts` (`APIGEE_CALLBACK_MESSAGE` +
 `isApigeeCallbackMessage`), para no confundirlo con mensajes de terceros.
 
+Antes de nada comprueba que efectivamente esté embebido:
+
+```ts
+if (window.self === window.top) {
+  inject(Router).navigateByUrl('/');
+  return;
+}
+```
+
+Fuera del iframe la ruta no tiene destinatario —`window.parent` sería esta misma
+ventana y el mensaje se perdería—, así que el usuario se quedaría en el template
+vacío sin salida. Se llega ahí por un marcador, un F5 o una URL escrita a mano;
+en ese caso se le devuelve al portal.
+
 ### 4.4 `ApigeeAuthApiService` — el canje
 
 `src/app/features/auth/services/apigee-auth-api.ts`
