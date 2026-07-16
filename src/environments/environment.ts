@@ -6,7 +6,7 @@ export const environment = {
    */
   apiUrl: 'https://vip-busintco-lam-co-assurance.staging.echonet:20320',
   /**
-   * `true`  → la data de la tabla se sirve desde `public/mock/appointments-mock.json`.
+   * `true`  → la data de la tabla se sirve desde `src/assets/mock/appointments-mock.json`.
    * `false` → la data se pide al endpoint real (`{apiUrl}/emission/v2/requests/appointment`).
    */
   useMocks: true,

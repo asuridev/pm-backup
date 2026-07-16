@@ -53,7 +53,7 @@ const VIEW_OPTIONS: readonly ViewOption[] = [
             >
               <span>{{ selectedLabel() }}</span>
               <img
-                src="images/dropdown-arrow.svg"
+                src="assets/images/dropdown-arrow.svg"
                 alt=""
                 class="h-[6px] w-[12px] transition-transform"
                 [class.rotate-180]="socioOpen()"
@@ -93,7 +93,7 @@ const VIEW_OPTIONS: readonly ViewOption[] = [
               class="h-[36.55px] w-full rounded-input border-[1.08px] border-border-input bg-white px-2.5 pr-9 text-base font-light text-ink placeholder:text-medium-40 outline-none"
             />
             <img
-              src="images/search.svg"
+              src="assets/images/search.svg"
               alt=""
               class="pointer-events-none absolute top-1/2 right-2.5 h-[14px] w-[13px] -translate-y-1/2"
             />

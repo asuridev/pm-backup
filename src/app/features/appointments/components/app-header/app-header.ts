@@ -23,7 +23,7 @@ import { KeycloakSession } from '../../../auth/services/keycloak-session';
           class="mx-auto flex h-16 max-w-[1440px] items-center px-4 md:h-[75px] md:px-8 lg:px-12 2xl:pl-[78px] 2xl:pr-[60px]"
         >
           <img
-            src="images/logo.png"
+            src="assets/images/logo.png"
             alt="BNP Paribas Cardif"
             class="h-9 w-auto shrink-0 md:h-[44px]"
           />
@@ -43,7 +43,7 @@ import { KeycloakSession } from '../../../auth/services/keycloak-session';
               <span
                 class="flex h-4 w-[15px] shrink-0 items-center justify-center rounded-[2.7px] border-[0.7px] border-brand-green"
               >
-                <img src="images/user-icon.svg" alt="" class="h-[11px] w-[10px]" />
+                <img src="assets/images/user-icon.svg" alt="" class="h-[11px] w-[10px]" />
               </span>
               <span class="hidden max-w-[220px] truncate text-xs text-brand-teal lg:inline">
                 {{ displayName() }}
@@ -54,7 +54,7 @@ import { KeycloakSession } from '../../../auth/services/keycloak-session';
                 aria-label="Cerrar sesión"
                 class="flex shrink-0 items-center"
               >
-                <img src="images/chevron-down.svg" alt="" class="size-3 rotate-180" />
+                <img src="assets/images/chevron-down.svg" alt="" class="size-3 rotate-180" />
               </button>
             </div>
           </div>

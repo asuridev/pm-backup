@@ -16,7 +16,7 @@ export interface RequestQueryParams {
   partnerId?: string;
 }
 
-const MOCK_URL = 'mock/appointments-mock.json';
+const MOCK_URL = 'assets/mock/appointments-mock.json';
 const REQUESTS_PATH = '/emission/v2/requests/appointment';
 
 /**

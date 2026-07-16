@@ -26,7 +26,7 @@ import {
           (click)="go(page() - 1)"
           aria-label="Anterior"
         >
-          <img src="images/page-arrow-left.svg" alt="" class="h-[6px] w-[9px] rotate-90" />
+          <img src="assets/images/page-arrow-left.svg" alt="" class="h-[6px] w-[9px] rotate-90" />
         </button>
 
         @for (p of visiblePages(); track p) {
@@ -53,7 +53,7 @@ import {
           (click)="go(page() + 1)"
           aria-label="Siguiente"
         >
-          <img src="images/page-arrow-right.svg" alt="" class="h-[6px] w-[9px] -rotate-90" />
+          <img src="assets/images/page-arrow-right.svg" alt="" class="h-[6px] w-[9px] -rotate-90" />
         </button>
       </nav>
     }

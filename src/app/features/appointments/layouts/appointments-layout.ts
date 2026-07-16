@@ -32,7 +32,7 @@ import { AppFooter } from '../components/app-footer/app-footer';
           [class.border-medium-40]="!citas.isActive"
           [class.text-ink-80]="!citas.isActive"
         >
-          <img src="images/tab-citas.svg" alt="" class="h-6 w-6 shrink-0 md:h-[34px] md:w-[34px]" />
+          <img src="assets/images/tab-citas.svg" alt="" class="h-6 w-6 shrink-0 md:h-[34px] md:w-[34px]" />
           <span>Asignación de citas</span>
         </a>
 
@@ -50,7 +50,7 @@ import { AppFooter } from '../components/app-footer/app-footer';
           [class.border-medium-40]="!autor.isActive"
           [class.text-ink-80]="!autor.isActive"
         >
-          <img src="images/tab-autorizaciones.svg" alt="" class="h-[17px] w-6 shrink-0 md:h-[24px] md:w-[34px]" />
+          <img src="assets/images/tab-autorizaciones.svg" alt="" class="h-[17px] w-6 shrink-0 md:h-[24px] md:w-[34px]" />
           <span>Autorizaciones</span>
         </a>
       </nav>

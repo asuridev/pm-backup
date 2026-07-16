@@ -46,13 +46,13 @@
 
 /*
  * Fuentes de marca BNPP Sans (fallback activo mientras no estén los .woff2).
- * Al recibir los archivos, colocarlos en public/fonts/ y descomentar. El layout
- * ya está calibrado; solo cambia el render exacto del glifo.
+ * Al recibir los archivos, colocarlos en src/assets/fonts/ y descomentar. El
+ * layout ya está calibrado; solo cambia el render exacto del glifo.
  *
- * @font-face { font-family: "BNPP Sans"; font-weight: 300; src: url("/fonts/BNPPSans-Light.woff2") format("woff2"); }
- * @font-face { font-family: "BNPP Sans"; font-weight: 400; src: url("/fonts/BNPPSans-Regular.woff2") format("woff2"); }
- * @font-face { font-family: "BNPP Sans"; font-weight: 700; src: url("/fonts/BNPPSans-Bold.woff2") format("woff2"); }
- * @font-face { font-family: "BNPP Sans Condensed"; font-weight: 400; src: url("/fonts/BNPPSansCondensed-Regular.woff2") format("woff2"); }
+ * @font-face { font-family: "BNPP Sans"; font-weight: 300; src: url("/assets/fonts/BNPPSans-Light.woff2") format("woff2"); }
+ * @font-face { font-family: "BNPP Sans"; font-weight: 400; src: url("/assets/fonts/BNPPSans-Regular.woff2") format("woff2"); }
+ * @font-face { font-family: "BNPP Sans"; font-weight: 700; src: url("/assets/fonts/BNPPSans-Bold.woff2") format("woff2"); }
+ * @font-face { font-family: "BNPP Sans Condensed"; font-weight: 400; src: url("/assets/fonts/BNPPSansCondensed-Regular.woff2") format("woff2"); }
  */
 
 html,
